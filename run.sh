@@ -1,15 +1,12 @@
 #!/bin/bash
-# Launch Ghostty with custom shaders on macOS
+# Launch Ghostty with CRT shader generated from config.toml
 
+set -e
 cd "$(dirname "$0")"
 
-# Default shader
-SHADER="${1:-shaders/crt.glsl}"
+# Generate shader from config.toml
+SHADER_PATH=$(python3 generate.py)
+echo "Generated: $SHADER_PATH"
 
-# Get absolute path
-SHADER_PATH="$(pwd)/$SHADER"
-
-echo "Launching Ghostty with shader: $SHADER_PATH"
-
-# macOS requires using 'open' to launch GUI apps
+# Launch Ghostty
 open -na Ghostty.app --args --custom-shader="$SHADER_PATH" --custom-shader-animation=true

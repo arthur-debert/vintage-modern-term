@@ -1,0 +1,64 @@
+# CRT Shader Configuration
+# All values are normalized 0.0 to 1.0
+# 0.0 = effect disabled / minimum
+# 1.0 = effect at maximum intensity
+
+[color]
+# RGB phosphor color when monochrome is enabled
+phosphor_r = 0.0
+phosphor_g = 1.0
+phosphor_b = 0.3
+
+# 0.0 = full color, 1.0 = monochrome phosphor
+monochrome = 1.0
+
+# 0.0 = grayscale, 1.0 = full saturation
+saturation = 0.7
+
+[bloom]
+# 0.0 = none, 1.0 = heavy glow
+intensity = 0.4
+
+# 0.0 = tight glow, 1.0 = diffuse glow
+size = 0.25
+
+[screen]
+# 0.0 = flat, 1.0 = heavy barrel distortion
+curvature = 0.1
+
+# 0.0 = none, 1.0 = heavy edge darkening
+vignette = 0.4
+
+[scanlines]
+# 0.0 = none, 1.0 = dark scanlines
+intensity = 0.3
+
+# 0.0 = sparse lines, 1.0 = dense lines
+size = 0.33
+
+[noise]
+# 0.0 = clean, 1.0 = heavy static
+static = 0.17
+
+# 0.0 = stable, 1.0 = heavy flicker
+flicker = 0.2
+
+# 0.0 = stable, 1.0 = heavy horizontal jitter
+jitter = 0.2
+
+# 0.0 = none, 1.0 = heavy VHS-style distortion
+hsync = 0.0
+
+[chromatic]
+# 0.0 = none, 1.0 = heavy RGB separation
+aberration = 0.2
+
+[levels]
+# 0.0 = darker, 0.5 = normal, 1.0 = brighter
+brightness = 0.5
+
+# 0.0 = flat, 0.5 = normal, 1.0 = punchy
+contrast = 0.5
+
+# 0.0 = none, 1.0 = heavy room light reflection
+ambient = 0.25
