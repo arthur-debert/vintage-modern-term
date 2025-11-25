@@ -120,7 +120,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 curved_uv = uv;
     if (CURVATURE > 0.0) {
         float distortion = dot(cc, cc) * CURVATURE;
-        curved_uv = uv - cc * distortion;
+        curved_uv = uv + cc * distortion;
     }
 
     // Check bounds - render black outside screen area

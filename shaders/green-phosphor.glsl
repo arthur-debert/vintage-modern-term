@@ -43,7 +43,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // Barrel distortion
     vec2 curved_uv = uv;
     float distortion = dot(cc, cc) * CURVATURE;
-    curved_uv = uv - cc * distortion;
+    curved_uv = uv + cc * distortion;
 
     // Check bounds
     if (isInScreen(curved_uv) < 0.5) {
