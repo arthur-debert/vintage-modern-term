@@ -44,8 +44,8 @@ const float FLICKER_RAW = FLICKER * 0.1;
 const float JITTER_RAW = JITTER * 0.005;
 const float HSYNC_RAW = HSYNC * 0.15;
 const float RGB_SHIFT_RAW = CHROMA * 0.01;
-const float BRIGHTNESS_RAW = mix(0.8, 1.2, BRIGHTNESS);
-const float CONTRAST_RAW = mix(0.8, 1.2, CONTRAST);
+const float BRIGHTNESS_RAW = mix(0.4, 1.6, BRIGHTNESS);  // 0.0=dark, 0.5=normal, 1.0=bright
+const float CONTRAST_RAW = mix(0.5, 1.5, CONTRAST);      // 0.0=flat, 0.5=normal, 1.0=punchy
 const float AMBIENT_RAW = AMBIENT * 0.2;
 
 // ============================================
