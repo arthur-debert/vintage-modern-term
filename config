@@ -22,7 +22,7 @@ custom-shader-animation = true
 # ============================================
 
 # Dark background works best with glow effects
-background =rgb(4, 4, 4)
+background =rgb(0, 0, 0)
 foreground =rgb(11, 175, 11)
 
 # Slightly transparent for compositing (optional)

@@ -5,9 +5,9 @@
 
 [color]
 # RGB phosphor color when monochrome is enabled
-phosphor_r = 0.0
-phosphor_g = 1.0
-phosphor_b = 0.3
+phosphor_r = 1.0
+phosphor_g = 0.7
+phosphor_b = 0.2
 
 # 0.0 = full color, 1.0 = monochrome phosphor
 monochrome = 1.0
@@ -17,10 +17,10 @@ saturation = 0.7
 
 [bloom]
 # 0.0 = none, 1.0 = heavy glow
-intensity = 0.4
+intensity = 0.2
 
 # 0.0 = tight glow, 1.0 = diffuse glow
-size = 0.25
+size = 0.45
 
 [screen]
 # 0.0 = flat, 1.0 = heavy barrel distortion
@@ -55,10 +55,10 @@ aberration = 0.2
 
 [levels]
 # 0.0 = darker, 0.5 = normal, 1.0 = brighter
-brightness = 0.5
+brightness = 0.3
 
 # 0.0 = flat, 0.5 = normal, 1.0 = punchy
-contrast = 0.5
+contrast = 0.9
 
 # 0.0 = none, 1.0 = heavy room light reflection
-ambient = 0.25
+ambient = 0.1
