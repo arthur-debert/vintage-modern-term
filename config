@@ -1,0 +1,58 @@
+# Ghostty Configuration for Vintage Modern Terminal
+# Copy this to ~/.config/ghostty/config or use: ghostty --config-file=./config
+
+# ============================================
+# SHADER CONFIGURATION
+# ============================================
+
+# Pick one shader (uncomment the one you want):
+custom-shader = shaders/crt.glsl
+# custom-shader = shaders/simple-glow.glsl
+# custom-shader = shaders/passthrough.glsl
+
+# You can stack multiple shaders (they apply in order):
+# custom-shader = shaders/crt.glsl
+# custom-shader = shaders/simple-glow.glsl
+
+# Shader animation (set to false to disable time-based effects)
+custom-shader-animation = true
+
+# ============================================
+# APPEARANCE (tweak to match your shader)
+# ============================================
+
+# Dark background works best with glow effects
+background = #0a0a0a
+foreground = #00ff00
+
+# Slightly transparent for compositing (optional)
+# background-opacity = 0.95
+
+# Font (monospace looks best)
+font-family = "JetBrains Mono"
+font-size = 14
+
+# Cursor style
+cursor-style = block
+cursor-style-blink = true
+
+# ============================================
+# WINDOW
+# ============================================
+
+window-padding-x = 10
+window-padding-y = 10
+
+# ============================================
+# COLORS (green phosphor theme)
+# ============================================
+
+# You can customize the palette for a more vintage look:
+# palette = 0=#0a0a0a
+# palette = 1=#ff5555
+# palette = 2=#00ff00
+# palette = 3=#ffff55
+# palette = 4=#5555ff
+# palette = 5=#ff55ff
+# palette = 6=#55ffff
+# palette = 7=#bbbbbb
