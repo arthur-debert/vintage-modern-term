@@ -1,109 +1,107 @@
 // Cool Retro Term Style CRT Shader for Ghostty
 // Inspired by https://github.com/Swordfish90/cool-retro-term
 // Licensed under GPL-3.0
+//
+// All parameters below use a normalized 0.0 to 1.0 range:
+//   0.0 = effect disabled / minimum
+//   1.0 = effect at maximum intensity
 
 // ============================================
-// MONOCHROME / COLOR SETTINGS
+// CONFIGURATION - All values are 0.0 to 1.0
 // ============================================
 
-// PHOSPHOR_COLOR - the color of the CRT phosphor
-// Green: vec3(0.0, 1.0, 0.0)  Amber: vec3(1.0, 0.7, 0.0)  White: vec3(1.0)
-const vec3 PHOSPHOR_COLOR = vec3(0.0, 1.0, 0.3);
+// MONOCHROME / COLOR
+const vec3 PHOSPHOR_COLOR = vec3(0.0, 1.0, 0.3);  // RGB color when monochrome
+const float MONOCHROME = 0.0;    // 0.0 = full color, 1.0 = single phosphor color
+const float SATURATION = 1.0;    // 0.0 = grayscale, 1.0 = full saturation
 
-// MONOCHROME - convert to single color (0.0 = full color, 1.0 = monochrome)
-const float MONOCHROME = 0.0;
+// BLOOM / GLOW
+const float BLOOM = 0.4;         // 0.0 = none, 1.0 = heavy glow
+const float BLOOM_SIZE = 0.25;   // 0.0 = tight glow, 1.0 = diffuse glow
 
-// SATURATION - color saturation (0.0 = grayscale, 1.0 = full color)
-const float SATURATION = 1.0;
+// SCREEN SHAPE
+const float CURVATURE = 0.24;    // 0.0 = flat, 1.0 = heavy barrel distortion
+const float VIGNETTE = 0.4;      // 0.0 = none, 1.0 = heavy edge darkening
 
-// ============================================
-// BLOOM / GLOW SETTINGS
-// ============================================
+// SCANLINES
+const float SCANLINES = 0.3;     // 0.0 = none, 1.0 = dark scanlines
+const float SCANLINE_SIZE = 0.33;// 0.0 = sparse lines, 1.0 = dense lines
 
-// BLOOM - glow around bright pixels (0.0 = none, 0.5 = moderate, 1.0 = heavy)
-const float BLOOM = 0.4;
+// NOISE & INTERFERENCE
+const float NOISE = 0.17;        // 0.0 = clean, 1.0 = heavy static
+const float FLICKER = 0.2;       // 0.0 = stable, 1.0 = heavy flicker
+const float JITTER = 0.2;        // 0.0 = stable, 1.0 = heavy horizontal jitter
+const float HSYNC = 0.0;         // 0.0 = none, 1.0 = heavy VHS-style distortion
 
-// BLOOM_RADIUS - size of the glow (1.0 = tight, 3.0 = diffuse)
-const float BLOOM_RADIUS = 1.5;
-
-// ============================================
-// SCREEN SHAPE SETTINGS
-// ============================================
-
-// CURVATURE - barrel distortion (0.0 = flat, 0.3 = moderate, 0.5 = heavy)
-const float CURVATURE = 0.12;
-
-// VIGNETTE - darkening at edges (0.0 = none, 0.5 = moderate, 1.0 = heavy)
-const float VIGNETTE = 0.4;
-
-// ============================================
-// SCANLINE SETTINGS
-// ============================================
-
-// SCANLINE_INTENSITY - darkness of scanlines (0.0 = none, 0.5 = visible, 1.0 = dark)
-const float SCANLINE_INTENSITY = 0.3;
-
-// SCANLINE_DENSITY - lines per pixel (0.5 = sparse, 1.0 = normal, 2.0 = dense)
-const float SCANLINE_DENSITY = 1.0;
-
-// ============================================
-// NOISE & INTERFERENCE SETTINGS
-// ============================================
-
-// STATIC_NOISE - TV static grain (0.0 = none, 0.1 = subtle, 0.3 = noisy)
-const float STATIC_NOISE = 0.05;
-
-// FLICKER - brightness variation (0.0 = stable, 0.05 = subtle, 0.1 = noticeable)
-const float FLICKER = 0.02;
-
-// JITTER - horizontal pixel jitter (0.0 = none, 0.002 = subtle, 0.005 = visible)
-const float JITTER = 0.001;
-
-// HORIZONTAL_SYNC - VHS-style horizontal distortion (0.0 = none, 0.1 = subtle)
-const float HORIZONTAL_SYNC = 0.0;
-
-// ============================================
 // CHROMATIC ABERRATION
-// ============================================
+const float CHROMA = 0.2;        // 0.0 = none, 1.0 = heavy RGB separation
 
-// RGB_SHIFT - color channel separation (0.0 = none, 0.002 = subtle, 0.005 = visible)
-const float RGB_SHIFT = 0.002;
-
-// ============================================
 // BRIGHTNESS / CONTRAST
+const float BRIGHTNESS = 0.5;    // 0.0 = darker, 0.5 = normal, 1.0 = brighter
+const float CONTRAST = 0.5;      // 0.0 = flat, 0.5 = normal, 1.0 = punchy
+const float AMBIENT = 0.25;      // 0.0 = none, 1.0 = heavy room light reflection
+
+// ============================================
+// PARAMETER MAPPING (0-1 to actual values)
 // ============================================
 
-// BRIGHTNESS - overall brightness (0.8 = darker, 1.0 = normal, 1.2 = brighter)
-const float BRIGHTNESS = 1.0;
+// Bloom radius: 0.0 → 1.0, 1.0 → 3.0
+const float BLOOM_RADIUS_RAW = mix(1.0, 3.0, BLOOM_SIZE);
 
-// CONTRAST - color contrast (0.8 = flat, 1.0 = normal, 1.2 = punchy)
-const float CONTRAST = 1.0;
+// Curvature: 0.0 → 0.0, 1.0 → 0.5
+const float CURVATURE_RAW = CURVATURE * 0.5;
 
-// AMBIENT_LIGHT - simulated room light reflection (0.0 = none, 0.2 = subtle)
-const float AMBIENT_LIGHT = 0.05;
+// Vignette: 0.0 → 0.0, 1.0 → 1.5
+const float VIGNETTE_RAW = VIGNETTE * 1.5;
+
+// Scanline intensity: 0.0 → 0.0, 1.0 → 1.0 (already normalized)
+const float SCANLINE_INTENSITY_RAW = SCANLINES;
+
+// Scanline density: 0.0 → 0.5, 1.0 → 2.0
+const float SCANLINE_DENSITY_RAW = mix(0.5, 2.0, SCANLINE_SIZE);
+
+// Static noise: 0.0 → 0.0, 1.0 → 0.3
+const float STATIC_NOISE_RAW = NOISE * 0.3;
+
+// Flicker: 0.0 → 0.0, 1.0 → 0.1
+const float FLICKER_RAW = FLICKER * 0.1;
+
+// Jitter: 0.0 → 0.0, 1.0 → 0.005
+const float JITTER_RAW = JITTER * 0.005;
+
+// Horizontal sync: 0.0 → 0.0, 1.0 → 0.15
+const float HSYNC_RAW = HSYNC * 0.15;
+
+// RGB shift: 0.0 → 0.0, 1.0 → 0.01
+const float RGB_SHIFT_RAW = CHROMA * 0.01;
+
+// Brightness: 0.0 → 0.8, 1.0 → 1.2
+const float BRIGHTNESS_RAW = mix(0.8, 1.2, BRIGHTNESS);
+
+// Contrast: 0.0 → 0.8, 1.0 → 1.2
+const float CONTRAST_RAW = mix(0.8, 1.2, CONTRAST);
+
+// Ambient light: 0.0 → 0.0, 1.0 → 0.2
+const float AMBIENT_RAW = AMBIENT * 0.2;
 
 // ============================================
 // SHADER CODE
 // ============================================
 
-// Attempt to pre-compute sample offsets for bloom
 const vec2[12] bloomSamples = vec2[12](
     vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, -1.0),
     vec2(0.707, 0.707), vec2(-0.707, 0.707), vec2(0.707, -0.707), vec2(-0.707, -0.707),
     vec2(1.0, 0.5), vec2(-1.0, 0.5), vec2(0.5, 1.0), vec2(-0.5, 1.0)
 );
 
-// Hash function for noise
 float hash(vec2 p) {
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
-// Convert RGB to grayscale
 float luminance(vec3 c) {
     return dot(c, vec3(0.299, 0.587, 0.114));
 }
 
-// Check if UV is within screen bounds
 float isInScreen(vec2 v) {
     vec2 s = step(0.0, v) - step(1.0, v);
     return s.x * s.y;
@@ -111,15 +109,13 @@ float isInScreen(vec2 v) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
-
-    // Distance from center (for curvature and vignette)
     vec2 cc = uv - 0.5;
     float dist = length(cc);
 
     // === BARREL DISTORTION (CURVATURE) ===
     vec2 curved_uv = uv;
-    if (CURVATURE > 0.0) {
-        float distortion = dot(cc, cc) * CURVATURE;
+    if (CURVATURE_RAW > 0.0) {
+        float distortion = dot(cc, cc) * CURVATURE_RAW;
         curved_uv = uv + cc * distortion;
     }
 
@@ -131,17 +127,17 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     // === HORIZONTAL SYNC DISTORTION ===
     vec2 sample_uv = curved_uv;
-    if (HORIZONTAL_SYNC > 0.0) {
+    if (HSYNC_RAW > 0.0) {
         float sync_noise = hash(vec2(floor(curved_uv.y * 100.0), iTime));
         if (sync_noise > 0.99) {
-            sample_uv.x += (hash(vec2(iTime, curved_uv.y)) - 0.5) * HORIZONTAL_SYNC;
+            sample_uv.x += (hash(vec2(iTime, curved_uv.y)) - 0.5) * HSYNC_RAW;
         }
     }
 
     // === JITTER ===
-    if (JITTER > 0.0) {
+    if (JITTER_RAW > 0.0) {
         float jitter_noise = hash(sample_uv * 100.0 + iTime);
-        sample_uv.x += (jitter_noise - 0.5) * JITTER;
+        sample_uv.x += (jitter_noise - 0.5) * JITTER_RAW;
     }
 
     // Clamp UV to prevent edge bleeding
@@ -149,9 +145,9 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     // === CHROMATIC ABERRATION ===
     vec3 color;
-    if (RGB_SHIFT > 0.0) {
-        vec2 r_uv = clamp(sample_uv + vec2(RGB_SHIFT, 0.0), 0.0, 1.0);
-        vec2 b_uv = clamp(sample_uv - vec2(RGB_SHIFT, 0.0), 0.0, 1.0);
+    if (RGB_SHIFT_RAW > 0.0) {
+        vec2 r_uv = clamp(sample_uv + vec2(RGB_SHIFT_RAW, 0.0), 0.0, 1.0);
+        vec2 b_uv = clamp(sample_uv - vec2(RGB_SHIFT_RAW, 0.0), 0.0, 1.0);
         float r = texture(iChannel0, r_uv).r;
         float g = texture(iChannel0, sample_uv).g;
         float b = texture(iChannel0, b_uv).b;
@@ -163,7 +159,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     // === BLOOM / GLOW ===
     if (BLOOM > 0.0) {
         vec3 glow = vec3(0.0);
-        vec2 blur_size = BLOOM_RADIUS / iResolution.xy;
+        vec2 blur_size = BLOOM_RADIUS_RAW / iResolution.xy;
 
         for (int i = 0; i < 12; i++) {
             vec2 offset = bloomSamples[i] * blur_size;
@@ -192,39 +188,39 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     }
 
     // === CONTRAST ===
-    color = (color - 0.5) * CONTRAST + 0.5;
+    color = (color - 0.5) * CONTRAST_RAW + 0.5;
 
     // === SCANLINES ===
-    if (SCANLINE_INTENSITY > 0.0) {
-        float scanline = sin(fragCoord.y * SCANLINE_DENSITY * 3.14159) * 0.5 + 0.5;
-        color *= 1.0 - (scanline * SCANLINE_INTENSITY * 0.5);
+    if (SCANLINE_INTENSITY_RAW > 0.0) {
+        float scanline = sin(fragCoord.y * SCANLINE_DENSITY_RAW * 3.14159) * 0.5 + 0.5;
+        color *= 1.0 - (scanline * SCANLINE_INTENSITY_RAW * 0.5);
     }
 
     // === STATIC NOISE ===
-    if (STATIC_NOISE > 0.0) {
+    if (STATIC_NOISE_RAW > 0.0) {
         float noise = hash(uv * iResolution.xy + iTime * 1000.0);
-        color += (noise - 0.5) * STATIC_NOISE;
+        color += (noise - 0.5) * STATIC_NOISE_RAW;
     }
 
     // === VIGNETTE ===
-    if (VIGNETTE > 0.0) {
-        float vig = 1.0 - dot(cc * VIGNETTE * 2.0, cc * VIGNETTE * 2.0);
+    if (VIGNETTE_RAW > 0.0) {
+        float vig = 1.0 - dot(cc * VIGNETTE_RAW * 2.0, cc * VIGNETTE_RAW * 2.0);
         vig = clamp(vig, 0.0, 1.0);
         color *= vig;
     }
 
     // === FLICKER ===
-    if (FLICKER > 0.0) {
-        float flick = 1.0 - FLICKER * sin(iTime * 15.0) * hash(vec2(iTime, 0.0));
+    if (FLICKER_RAW > 0.0) {
+        float flick = 1.0 - FLICKER_RAW * sin(iTime * 15.0) * hash(vec2(iTime, 0.0));
         color *= flick;
     }
 
     // === BRIGHTNESS ===
-    color *= BRIGHTNESS;
+    color *= BRIGHTNESS_RAW;
 
     // === AMBIENT LIGHT ===
-    if (AMBIENT_LIGHT > 0.0) {
-        color += vec3(AMBIENT_LIGHT) * (1.0 - dist);
+    if (AMBIENT_RAW > 0.0) {
+        color += vec3(AMBIENT_RAW) * (1.0 - dist);
     }
 
     // Clamp final color
