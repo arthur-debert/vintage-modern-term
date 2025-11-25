@@ -27,7 +27,7 @@ size = 0.25
 curvature = 0.1
 
 # 0.0 = none, 1.0 = heavy edge darkening
-vignette = 0.4
+vignette = 0.1
 
 [scanlines]
 # 0.0 = none, 1.0 = dark scanlines

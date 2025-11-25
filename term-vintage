@@ -1,0 +1,53 @@
+#!/bin/bash
+# Launch Ghostty with CRT shader effects
+
+set -e
+cd "$(dirname "$0")"
+
+show_help() {
+    cat << 'EOF'
+term-vintage - Launch Ghostty with retro CRT shader effects
+
+USAGE
+    term-vintage [OPTIONS] [SHADER]
+
+OPTIONS
+    --help          Show this help message
+    --save NAME     Generate shader from config.toml and save as NAME.glsl
+
+EXAMPLES
+    term-vintage                    Generate shader from config.toml and launch
+    term-vintage --save amber       Generate, save as amber.glsl, and launch
+    term-vintage amber.glsl         Launch with previously saved shader
+
+WORKFLOW
+    1. Edit config.toml to tweak effects (all values 0.0 to 1.0)
+    2. Run term-vintage to preview
+    3. Happy? Run term-vintage --save <name> to keep it
+    4. Load anytime with term-vintage <name>.glsl
+
+FILES
+    config.toml                     Effect settings (edit this)
+    templates/crt.template.glsl     Shader template
+    /tmp/crt-term/                  Generated shaders (debug history)
+EOF
+}
+
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    show_help
+    exit 0
+elif [[ "$1" == "--save" && -n "$2" ]]; then
+    SHADER_PATH=$(python3 generate.py)
+    SAVE_PATH="$(pwd)/$2.glsl"
+    cp "$SHADER_PATH" "$SAVE_PATH"
+    echo "Saved: $SAVE_PATH"
+    SHADER_PATH="$SAVE_PATH"
+elif [[ -n "$1" ]]; then
+    SHADER_PATH="$(pwd)/$1"
+    echo "Using: $SHADER_PATH"
+else
+    SHADER_PATH=$(python3 generate.py)
+    echo "Generated: $SHADER_PATH"
+fi
+
+open -na Ghostty.app --args --custom-shader="$SHADER_PATH" --custom-shader-animation=true

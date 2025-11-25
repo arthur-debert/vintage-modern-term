@@ -2,207 +2,129 @@
 
 Custom Ghostty shaders for retro CRT terminal aesthetics, inspired by [cool-retro-term](https://github.com/Swordfish90/cool-retro-term).
 
-![Ghostty](https://img.shields.io/badge/Ghostty-1.2+-blue)
-![License](https://img.shields.io/badge/License-GPL--3.0-green)
-
 ## Quick Start
 
 ```bash
-# Run with CRT effect (default)
-./run.sh
-
-# Run with specific shader
-./run.sh shaders/crt.glsl
-./run.sh shaders/green-phosphor.glsl
-./run.sh shaders/amber-phosphor.glsl
-./run.sh shaders/vhs.glsl
+./term-vintage              # Generate from config.toml and launch
+./term-vintage --help       # See all options
 ```
 
-## Available Shaders
+## Usage
 
-| Shader | Description |
-|--------|-------------|
-| `crt.glsl` | Full CRT simulation with all effects configurable |
-| `green-phosphor.glsl` | Classic 80s green monochrome monitor |
-| `amber-phosphor.glsl` | Warm amber monochrome terminal |
-| `vhs.glsl` | Glitchy VHS tape effect with tracking errors |
-| `simple-glow.glsl` | Minimal bloom/glow effect |
-| `monochrome.glsl` | Simple green monochrome conversion |
-| `passthrough.glsl` | No effect (template for new shaders) |
+```bash
+# 1. Edit config.toml to tweak effects
+# 2. Preview your changes
+./term-vintage
 
-## Effect Comparison
+# 3. Happy with it? Save as a preset
+./term-vintage --save amber
 
-| Effect | `crt.glsl` | `green-phosphor.glsl` | `amber-phosphor.glsl` |
-|--------|:----------:|:---------------------:|:---------------------:|
-| **Phosphor Color** | Configurable | Green (fixed) | Amber (fixed) |
-| **Monochrome** | Adjustable 0-1 | Always on | Always on |
-| **Saturation** | Adjustable | - | - |
-| **Bloom/Glow** | Yes | Yes | Yes |
-| **Bloom Radius** | Adjustable | Fixed (2.0) | Fixed (2.0) |
-| **Curvature** | Yes | Yes | Yes |
-| **Vignette** | Yes | Yes | Yes |
-| **Scanlines** | Yes | Yes | Yes |
-| **Scanline Density** | Adjustable | Fixed (1.0) | Fixed (1.0) |
-| **Static Noise** | Yes | Yes | Yes |
-| **Flicker** | Yes | Yes | Yes |
-| **Jitter** | Yes | - | - |
-| **Horizontal Sync** | Yes | - | - |
-| **RGB Shift (Chromatic)** | Yes | - | - |
-| **Brightness** | Yes | Yes | Yes |
-| **Contrast** | Yes | Yes | Yes |
-| **Ambient Light** | Yes | Yes | Yes |
+# 4. Load saved presets anytime
+./term-vintage amber.glsl
+```
 
-### Summary
+## How It Works
 
-- **`crt.glsl`** - The "kitchen sink" shader with everything configurable. Full color or monochrome with any phosphor color, all effects with adjustable parameters, VHS-style glitch effects, and chromatic aberration.
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         config.toml                             │
+│  Human-friendly settings (all values normalized 0.0 to 1.0)     │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        generate.py                              │
+│  Reads TOML → Fills template → Writes shader with unique hash   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              /tmp/crt-term/crt-<hash>.glsl                      │
+│  Generated GLSL fragment shader (kept for debugging history)    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                          Ghostty                                │
+│  Renders terminal → Applies shader as post-processing filter    │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-- **`green-phosphor.glsl`** / **`amber-phosphor.glsl`** - Simplified presets with fixed monochrome color and core CRT effects only (bloom, curvature, scanlines, noise, flicker, vignette). Fewer parameters to tweak.
+## Shader Pipeline
 
-- **`vhs.glsl`** - Analog video distortion with tracking errors, tape noise bands, heavy static, and horizontal sync glitches.
+```
+┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+│   Terminal   │      │   Fragment   │      │    Final     │
+│    Output    │ ───▶ │    Shader    │ ───▶ │    Image     │
+│  (iChannel0) │      │  (per pixel) │      │              │
+└──────────────┘      └──────────────┘      └──────────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        ▼                    ▼                    ▼
+   ┌─────────┐         ┌─────────┐         ┌─────────┐
+   │ Bloom   │         │Scanlines│         │ Noise   │
+   │Curvature│         │Vignette │         │ Flicker │
+   │ Chroma  │         │Phosphor │         │ Jitter  │
+   └─────────┘         └─────────┘         └─────────┘
+```
+
+## Project Structure
+
+```
+vintage-modern-term/
+├── config.toml                  # Edit this - all effect settings
+├── generate.py                  # TOML → GLSL generator
+├── term-vintage                 # CLI to generate and launch
+└── templates/
+    └── crt.template.glsl        # Shader template
+```
 
 ## Configuration
 
-### crt.glsl Parameters
+All values in `config.toml` are normalized from **0.0** (disabled/minimum) to **1.0** (maximum).
 
-Edit the constants at the top of `shaders/crt.glsl` to customize:
-
-#### Monochrome / Color
-
-```glsl
-// Phosphor color: Green, Amber, White, or any RGB
-const vec3 PHOSPHOR_COLOR = vec3(0.0, 1.0, 0.3);  // Green
-// const vec3 PHOSPHOR_COLOR = vec3(1.0, 0.7, 0.0);  // Amber
-// const vec3 PHOSPHOR_COLOR = vec3(1.0);            // White
-
-// 0.0 = full color, 1.0 = monochrome
-const float MONOCHROME = 0.0;
-
-// Color saturation (0.0 = grayscale, 1.0 = full color)
-const float SATURATION = 1.0;
-```
-
-#### Bloom / Glow
-
-```glsl
-// Glow intensity (0.0 = none, 0.5 = moderate, 1.0 = heavy)
-const float BLOOM = 0.4;
-
-// Glow size (1.0 = tight, 3.0 = diffuse)
-const float BLOOM_RADIUS = 1.5;
-```
-
-#### Screen Shape
-
-```glsl
-// Barrel distortion (0.0 = flat, 0.3 = moderate, 0.5 = heavy)
-const float CURVATURE = 0.12;
-
-// Edge darkening (0.0 = none, 0.5 = moderate, 1.0 = heavy)
-const float VIGNETTE = 0.4;
-```
-
-#### Scanlines
-
-```glsl
-// Scanline darkness (0.0 = none, 0.5 = visible, 1.0 = dark)
-const float SCANLINE_INTENSITY = 0.3;
-
-// Lines per pixel (0.5 = sparse, 1.0 = normal, 2.0 = dense)
-const float SCANLINE_DENSITY = 1.0;
-```
-
-#### Noise & Interference
-
-```glsl
-// TV static grain (0.0 = none, 0.1 = subtle, 0.3 = noisy)
-const float STATIC_NOISE = 0.05;
-
-// Brightness variation (0.0 = stable, 0.05 = subtle, 0.1 = noticeable)
-const float FLICKER = 0.02;
-
-// Horizontal pixel jitter (0.0 = none, 0.002 = subtle, 0.005 = visible)
-const float JITTER = 0.001;
-
-// VHS-style horizontal distortion (0.0 = none, 0.1 = subtle)
-const float HORIZONTAL_SYNC = 0.0;
-```
-
-#### Chromatic Aberration
-
-```glsl
-// RGB channel separation (0.0 = none, 0.002 = subtle, 0.005 = visible)
-const float RGB_SHIFT = 0.002;
-```
-
-#### Brightness / Contrast
-
-```glsl
-// Overall brightness (0.8 = darker, 1.0 = normal, 1.2 = brighter)
-const float BRIGHTNESS = 1.0;
-
-// Color contrast (0.8 = flat, 1.0 = normal, 1.2 = punchy)
-const float CONTRAST = 1.0;
-
-// Simulated room light reflection (0.0 = none, 0.2 = subtle)
-const float AMBIENT_LIGHT = 0.05;
-```
-
-## Creating Your Own Shader
-
-1. Copy `shaders/passthrough.glsl` to a new file
-2. Edit the `mainImage` function
-3. Run with `./run.sh shaders/your-shader.glsl`
-
-### Available Uniforms
-
-Ghostty provides these ShaderToy-compatible uniforms:
-
-```glsl
-uniform sampler2D iChannel0;  // Terminal content texture
-uniform float iTime;          // Elapsed seconds
-uniform float iTimeDelta;     // Delta time
-uniform vec3 iResolution;     // Viewport size (use .xy)
-```
-
-### Basic Structure
-
-```glsl
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    vec2 uv = fragCoord / iResolution.xy;
-    vec4 color = texture(iChannel0, uv);
-
-    // Your effects here
-
-    fragColor = color;
-}
-```
+| Section | Parameter | Description |
+|---------|-----------|-------------|
+| **color** | `phosphor_r/g/b` | RGB phosphor color for monochrome mode |
+| | `monochrome` | Color → single phosphor color conversion |
+| | `saturation` | Color intensity |
+| **bloom** | `intensity` | Glow around bright pixels |
+| | `size` | Glow spread radius |
+| **screen** | `curvature` | Barrel distortion (CRT bulge) |
+| | `vignette` | Edge darkening |
+| **scanlines** | `intensity` | Horizontal line darkness |
+| | `size` | Line density |
+| **noise** | `static` | TV static grain |
+| | `flicker` | Brightness variation over time |
+| | `jitter` | Horizontal pixel displacement |
+| | `hsync` | VHS-style tracking errors |
+| **chromatic** | `aberration` | RGB channel separation |
+| **levels** | `brightness` | Overall brightness |
+| | `contrast` | Color contrast |
+| | `ambient` | Simulated room light reflection |
 
 ## Permanent Installation
 
-To use a shader permanently, add it to your Ghostty config:
+To use a shader permanently in Ghostty:
 
 ```bash
-# Copy shader to Ghostty config directory
-mkdir -p ~/.config/ghostty
-cp shaders/crt.glsl ~/.config/ghostty/
+# Save your favorite config as a preset
+./term-vintage --save my-crt
+
+# Copy to Ghostty config directory
+cp my-crt.glsl ~/.config/ghostty/
 ```
 
-Add to `~/.config/ghostty/config`:
-
+Then add to `~/.config/ghostty/config`:
 ```
-custom-shader = ~/.config/ghostty/crt.glsl
+custom-shader = ~/.config/ghostty/my-crt.glsl
 custom-shader-animation = true
 ```
 
-## Validation
+## Requirements
 
-Use the included validation script to check shader syntax:
-
-```bash
-./validate.sh shaders/crt.glsl
-```
-
-Requires `glslang` (`brew install glslang` on macOS).
+- Ghostty 1.2+
+- Python 3.11+ (or Python 3.x with `pip install tomli`)
 
 ## Credits
 

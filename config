@@ -22,8 +22,8 @@ custom-shader-animation = true
 # ============================================
 
 # Dark background works best with glow effects
-background = #0a0a0a
-foreground = #00ff00
+background =rgb(4, 4, 4)
+foreground =rgb(11, 175, 11)
 
 # Slightly transparent for compositing (optional)
 # background-opacity = 0.95
