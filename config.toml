@@ -4,61 +4,44 @@
 # 1.0 = effect at maximum intensity
 
 [color]
+# sample green r=0.0, g=0.9, b=0.1
+# sample amber r=1,  g=0.7, b=1
 # RGB phosphor color when monochrome is enabled
-phosphor_r = 1.0
-phosphor_g = 0.6
+phosphor_r = 0.9
+phosphor_g = 0.4
 phosphor_b = 0.1
 
-# 0.0 = full color, 1.0 = monochrome phosphor
 monochrome = 1.0
-
-# 0.0 = grayscale, 1.0 = full saturation
-saturation = 0.5
+saturation = 0.7
 
 [bloom]
-# 0.0 = none, 1.0 = heavy glow
-intensity = 0.4
+intensity = 0.7
 
-# 0.0 = tight glow, 1.0 = diffuse glow
-size = 0.7
+size = 0.9
 
 [screen]
-# 0.0 = flat, 1.0 = heavy barrel distortion
-curvature = 0.1
 
-# 0.0 = none, 1.0 = heavy edge darkening
-vignette = 0.1
+curvature = 0.1
+vignette = 0.3
 
 [scanlines]
-# 0.0 = none, 1.0 = dark scanlines
-intensity = 0.3
 
-# 0.0 = sparse lines, 1.0 = dense lines
+intensity = 0.2
 size = 0.33
 
 [noise]
-# 0.0 = clean, 1.0 = heavy static
-static = 0.2
 
-# 0.0 = stable, 1.0 = heavy flicker
+static = 0.3
 flicker = 0.2
-
-# 0.0 = stable, 1.0 = heavy horizontal jitter
-jitter = 0.2
-
-# 0.0 = none, 1.0 = heavy VHS-style distortion
-hsync = 0.0
+jitter = 0.1
+hsync = 0.1
 
 [chromatic]
-# 0.0 = none, 1.0 = heavy RGB separation
+
 aberration = 0.1
 
 [levels]
-# 0.0 = darker, 0.5 = normal, 1.0 = brighter
-brightness = 0.9
 
-# 0.0 = flat, 0.5 = normal, 1.0 = punchy
+brightness = 0.7
 contrast = 0.9
-
-# 0.0 = none, 1.0 = heavy room light reflection
 ambient = 0.0
