@@ -6,7 +6,7 @@
 // CONFIGURATION (generated from TOML)
 // ============================================
 
-const vec3 PHOSPHOR_COLOR = vec3(0.9, 0.4, 0.1);
+const vec3 PHOSPHOR_COLOR = vec3(0.0, 0.9, 0.1);
 const float MONOCHROME = 1.0;
 const float SATURATION = 0.7;
 

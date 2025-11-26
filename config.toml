@@ -7,8 +7,8 @@
 # sample green r=0.0, g=0.9, b=0.1
 # sample amber r=1,  g=0.7, b=1
 # RGB phosphor color when monochrome is enabled
-phosphor_r = 0.9
-phosphor_g = 0.4
+phosphor_r = 0.0
+phosphor_g = 0.9
 phosphor_b = 0.1
 
 monochrome = 1.0
