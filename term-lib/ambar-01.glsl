@@ -10,7 +10,7 @@ const vec3 PHOSPHOR_COLOR = vec3(0.9, 0.4, 0.1);
 const float MONOCHROME = 1.0;
 const float SATURATION = 0.7;
 
-const float BLOOM = 0.3;
+const float BLOOM = 0.7;
 const float BLOOM_SIZE = 0.9;
 
 const float CURVATURE = 0.1;
@@ -26,7 +26,7 @@ const float HSYNC = 0.1;
 
 const float CHROMA = 0.1;
 
-const float BRIGHTNESS = 0.5;
+const float BRIGHTNESS = 0.7;
 const float CONTRAST = 0.9;
 const float AMBIENT = 0.0;
 
