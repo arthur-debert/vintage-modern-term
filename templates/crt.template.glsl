@@ -34,7 +34,7 @@ const float AMBIENT = {ambient};
 // PARAMETER MAPPING (0-1 to actual values)
 // ============================================
 
-const float BLOOM_RADIUS_RAW = mix(1.0, 3.0, BLOOM_SIZE);
+const float BLOOM_RADIUS_RAW = mix(1.0, 15.0, BLOOM_SIZE);
 const float CURVATURE_RAW = CURVATURE * 0.5;
 const float VIGNETTE_RAW = VIGNETTE * 1.5;
 const float SCANLINE_INTENSITY_RAW = SCANLINES;
@@ -43,7 +43,7 @@ const float STATIC_NOISE_RAW = NOISE * 0.3;
 const float FLICKER_RAW = FLICKER * 0.1;
 const float JITTER_RAW = JITTER * 0.005;
 const float HSYNC_RAW = HSYNC * 0.15;
-const float RGB_SHIFT_RAW = CHROMA * 0.01;
+const float RGB_SHIFT_RAW = CHROMA * 0.0028;
 const float BRIGHTNESS_RAW = mix(0.4, 1.6, BRIGHTNESS);  // 0.0=dark, 0.5=normal, 1.0=bright
 const float CONTRAST_RAW = mix(0.5, 1.5, CONTRAST);      // 0.0=flat, 0.5=normal, 1.0=punchy
 const float AMBIENT_RAW = AMBIENT * 0.2;
@@ -79,7 +79,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {{
     // === BARREL DISTORTION (CURVATURE) ===
     vec2 curved_uv = uv;
     if (CURVATURE_RAW > 0.0) {{
-        float distortion = dot(cc, cc) * CURVATURE_RAW;
+        // Use quartic (r^4) distortion to keep center flat and ramp up at edges
+        // dot(cc, cc) is r^2. Squaring it gives r^4.
+        float r2 = dot(cc, cc);
+        float distortion = r2 * r2 * CURVATURE_RAW * 5.0; // Multiply by 5.0 to compensate for smaller values
         curved_uv = uv + cc * distortion;
     }}
 
@@ -124,11 +127,24 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {{
     float original_lum = luminance(color);
     if (BLOOM > 0.0) {{
         vec3 glow = vec3(0.0);
+        // Scale bloom radius by resolution to keep it pixel-perfect (constant size in pixels)
+        // BLOOM_RADIUS_RAW is roughly 1.0-3.0 pixels
         vec2 blur_size = BLOOM_RADIUS_RAW / iResolution.xy;
 
+        // Dithering: Random rotation for the bloom kernel per pixel
+        // This hides the low sample count artifacts (ghosting) by trading them for noise
+        float noise_val = hash(uv * iResolution.xy + iTime);
+        float angle = noise_val * 6.28318;
+        float s = sin(angle);
+        float c = cos(angle);
+        mat2 rot = mat2(c, -s, s, c);
+
         for (int i = 0; i < 12; i++) {{
-            vec2 offset = bloomSamples[i] * blur_size;
-            vec2 bloom_uv = clamp(sample_uv + offset, 0.0, 1.0);
+            // Rotate the offset
+            vec2 offset = bloomSamples[i];
+            offset = rot * offset;
+            
+            vec2 bloom_uv = clamp(sample_uv + offset * blur_size, 0.0, 1.0);
             vec3 sample_color = texture(iChannel0, bloom_uv).rgb;
             float lum = luminance(sample_color);
             if (lum > 0.1) {{
@@ -155,22 +171,39 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {{
     }}
 
     // === CONTRAST ===
+    // === CONTRAST ===
+    float pre_contrast_lum = luminance(color);
     color = (color - 0.5) * CONTRAST_RAW + 0.5;
+    
+    // Fix: Protect black levels
+    // Stronger protection: Cut off anything below 0.05 luminance from the original signal
+    color *= smoothstep(0.05, 0.2, pre_contrast_lum);
 
     // === SCANLINES ===
     if (SCANLINE_INTENSITY_RAW > 0.0) {{
-        float scanline = sin(fragCoord.y * SCANLINE_DENSITY_RAW * 3.14159) * 0.5 + 0.5;
+        // Use fragCoord.y for pixel-perfect scanlines that don't scale with window size
+        // We use curved_uv to distort the scanlines with the screen
+        // Convert curved_uv back to "virtual pixel coordinates" based on resolution
+        float scanline_y = curved_uv.y * iResolution.y;
+        
+        // Scale density: 1.0 = 1 line per 2 pixels (standard CRT)
+        // We divide by 2.0 to make SCANLINE_SIZE=1.0 mean "every other pixel"
+        float density = SCANLINE_DENSITY_RAW * 0.5;
+        
+        float scanline = sin(scanline_y * 3.14159 / density) * 0.5 + 0.5;
         color *= 1.0 - (scanline * SCANLINE_INTENSITY_RAW * 0.5);
     }}
 
     // === STATIC NOISE ===
     if (STATIC_NOISE_RAW > 0.0) {{
-        float noise = hash(uv * iResolution.xy + iTime * 1000.0);
+        // Noise based on pixel coordinates to be resolution independent (grain size constant)
+        float noise = hash(curved_uv * iResolution.xy + iTime * 1000.0);
         color += (noise - 0.5) * STATIC_NOISE_RAW;
     }}
 
     // === VIGNETTE ===
     if (VIGNETTE_RAW > 0.0) {{
+        // Use elliptical vignette (matches window shape)
         float vig = 1.0 - dot(cc * VIGNETTE_RAW * 2.0, cc * VIGNETTE_RAW * 2.0);
         vig = clamp(vig, 0.0, 1.0);
         color *= vig;

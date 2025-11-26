@@ -15,33 +15,33 @@ monochrome = 1.0
 saturation = 0.7
 
 [bloom]
-intensity = 0.7
+intensity = 0.2
 
-size = 0.9
+size = 1
 
 [screen]
 
-curvature = 0.1
-vignette = 0.3
+curvature = 0.0
+vignette = 0.0
 
 [scanlines]
 
 intensity = 0.2
-size = 0.33
+size = 0.5
 
 [noise]
 
 static = 0.3
-flicker = 0.2
-jitter = 0.1
-hsync = 0.1
+flicker = 0.3
+jitter = 0.2
+hsync = 0.0
 
 [chromatic]
 
-aberration = 0.1
+aberration = 0.7
 
 [levels]
 
 brightness = 0.7
-contrast = 0.9
+contrast = 0.6
 ambient = 0.0
